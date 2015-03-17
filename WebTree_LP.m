@@ -11,7 +11,7 @@ FILENAME = 'WebTree Data/fall-2013-edited.csv'; % You need to edit the file
                                                 % to remove the column
                                                 % headers.
 fid = fopen(FILENAME);
-data = textscan(fid, '%d %s %d %d %d %d %s %s %s %d %s', 'delimiter', ',');
+data = textscan(fid, '%d %s %d %d %d %d %s %s %s %s %s', 'delimiter', ',');
 fclose(fid);
 
 ID = data{1};
@@ -34,13 +34,18 @@ num_courses = length(courses);
 % Get map from CRN to cap
 course_celing_map = course_caps(courses.', crn, course_celing);
 
-% Populate the constraint matrices
-constraints = zeros(num_courses);
-constants = zeros(num_courses, 1);
-% Loop through the courses and set a constraint for each
-for i = 1:length(courses)
-    course_in_question = courses(i);
-    constraints(i, i) = 1;
-    constants(i) = course_celing_map(course_in_question);
-end
+% Get student preferences
+% How to do this?
+%     - Sum tree + branch for each choice
+student_prefs = get_student_pref(length(people), 25, ID, crn, tree, branch);
 
+% Put students in random order, accounting for seniority
+
+% For each student:
+%   Assign coefficients based on choices - objective function
+%   Constraints: 
+%       All courses >= 0
+%       Exactly four courses per student
+%           sum(all courses with no coeff == 4)
+%   Check course caps
+%   Maximize "happiness"
