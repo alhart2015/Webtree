@@ -30,3 +30,5 @@ function [course_map] = course_caps(unique_courses, all_courses, caps_list)
     end
 
     course_map = containers.Map(used_courses, caps);
+
+% Adding a comment
