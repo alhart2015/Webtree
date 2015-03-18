@@ -8,7 +8,7 @@ Author: Alden Hart
 '''
 import csv
 import numpy as np
-from student import Student
+import random
 
 # FILENAME = './WebTree Data/fall-2013.csv'
 FILENAME = './WebTree Data/test.csv'
@@ -82,9 +82,9 @@ def replace_with_numbers(class_years):
             out.append(0)
     return out
 
-def random_by_class(ids, class_years, crns, trees, branches, ceilings):
-    '''Puts students in random order by class. Seniors are organized first,
-        then juniors, sophomores, freshmen. NOTE the incoming data is organized
+def sort_by_class(ids, class_years, crns, trees, branches, ceilings):
+    '''Puts students in order by class. Seniors are organized first, then 
+        juniors, sophomores, freshmen. NOTE the incoming data is organized
         so that for any i, ids[i], class_years[i], crns[i], trees[i],
         branches[i], ceilings[i] all correspond to row i in the original data.
 
@@ -96,11 +96,79 @@ def random_by_class(ids, class_years, crns, trees, branches, ceilings):
         branches - the list of branch preferences
         ceilings - the courst ceilings
 
-    Returns: each of these lists sorted as described above
+    Returns: a numpy array sorted as described above
     '''
-    data = np.array([ids, class_years, crns, trees, branches, ceilings])
-    print data
+    raw_data = np.array([ids, class_years, crns, trees, branches, ceilings])
+    data = np.transpose(raw_data)
+    sorted_data = data[np.argsort(data[:, 1])]
+    desc_sorted_data = sorted_data[::-1]
+    
+    return desc_sorted_data
 
+def random_ordering(data):
+    '''Takes sorted data and puts it in a random ordering by class. Seniors
+        all come before juniors, juniors before sophomores, etc.
+
+    Parameters:
+        data - a 2-D numpy array sorted in descending order by class
+
+    Returns: a numpy array scrambled as described above
+    '''
+    # Find where each class ends
+    senior_found, junior_found, soph_found, frsh_found = False, False, False, False
+    for i in xrange(len(data)):
+        if not senior_found and data[i][CLASS] == 3:
+            senior_found = True
+            last_senior = i
+        elif not junior_found and data[i][CLASS] == 2:
+            junior_found = True
+            last_junior = i
+        elif not soph_found and data[i][CLASS] == 1:
+            soph_found = True
+            last_sophomore = i
+        elif not frsh_found:
+            if data[i][CLASS] == 0:
+                frsh_found = True
+                last_freshman = i
+            else:
+                last_freshman = 0
+
+    print last_senior, last_junior, last_sophomore, last_freshman
+
+    # Preallocate for speed
+    scrambled = np.zeros([len(data), len(data[0])])
+
+    for i in xrange(len(data)):
+        # Randomly arrange the seniors
+        for j in xrange(last_senior):
+            row = random.choice(last_senior)
+            scrambled[i] = row
+
+        # Randomly arrange the juniors
+        num_juniors = last_junior-last_senior
+        for k in xrange(num_juniors):
+            row = random.choice(num_juniors)
+            scrambled[i] = row
+
+        # Randomly arrange the sophomores
+        num_sophs = last_sophomore-last_junior
+        for m in xrange(num_sophs):
+            row = random.choice(num_sophs)
+            scrambled[i] = row
+
+        # Randomly arrange the freshmen
+        num_frosh = last_freshman-last_sophomore
+        for n in xrange(num_frosh):
+            row = random.choice(num_frosh)
+            scrambled[i] = row
+
+        # If anyone is "other," scramble them
+        if last_freshman > 0:
+            num_other = len(data) - last_freshman
+            for p in xrange(num_other):
+                row = random.choice(num_other)
+                scrambled[i] = row
+    return scrambled
 
 def main():
     all_data = read_file(FILENAME)
@@ -111,6 +179,12 @@ def main():
     trees = all_data[TREE]
     branches = all_data[BRANCH]
     ceilings = all_data[COURSE_CEILING]
+
+    sorted_data = sort_by_class(ids, class_years, crns, trees, branches, ceilings)
+    print sorted_data
+    scrambled_data = random_ordering(sorted_data)
+    print scrambled_data
+
     # print ids[5]
     # print class_years[5]
     # print crns[5]
