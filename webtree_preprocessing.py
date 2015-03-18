@@ -138,36 +138,67 @@ def random_ordering(data):
     # Preallocate for speed
     scrambled = np.zeros([len(data), len(data[0])])
 
-    for i in xrange(len(data)):
-        # Randomly arrange the seniors
-        for j in xrange(last_senior):
-            row = random.choice(last_senior)
-            scrambled[i] = row
+    # Randomly arrange the seniors
+    senior_order = random.sample(range(last_senior), last_senior)
+    print senior_order
 
-        # Randomly arrange the juniors
-        num_juniors = last_junior-last_senior
-        for k in xrange(num_juniors):
-            row = random.choice(num_juniors)
-            scrambled[i] = row
+    # Randomly arrange the juniors
+    num_juniors = last_junior - last_senior
+    junior_order = random.sample(range(last_senior, last_junior), num_juniors)
+    print junior_order
 
-        # Randomly arrange the sophomores
-        num_sophs = last_sophomore-last_junior
-        for m in xrange(num_sophs):
-            row = random.choice(num_sophs)
-            scrambled[i] = row
+    # Randomly arrange the sophomores
+    num_sophs = last_sophomore - last_junior
+    soph_order = random.sample(range(last_junior, last_sophomore), num_sophs)
+    print soph_order
 
-        # Randomly arrange the freshmen
-        num_frosh = last_freshman-last_sophomore
-        for n in xrange(num_frosh):
-            row = random.choice(num_frosh)
-            scrambled[i] = row
+    # Randomly arrange the freshmen
+    if last_freshman > 0:
+        num_frosh = last_freshman - last_sophomore
+    else:
+        num_frosh = len(data) - last_sophomore
+    freshman_order = random.sample(range(last_sophomore, len(data)), num_frosh)
+    print freshman_order
 
-        # If anyone is "other," scramble them
-        if last_freshman > 0:
-            num_other = len(data) - last_freshman
-            for p in xrange(num_other):
-                row = random.choice(num_other)
-                scrambled[i] = row
+    # Randomly arrange the "others"
+    others_exist = False
+    if last_freshman > 0:
+        num_other = len(data) - last_freshman
+        other_order = random.sample(range(last_freshman, len(data)), num_other)
+        others_exist = True
+    print len(data)
+
+    # for i in xrange(len(data)):
+    #     # Randomly arrange the seniors
+    #     for j in xrange(last_senior):
+    #         row = random.choice(last_senior)
+    #         scrambled[i] = row
+
+    #     # Randomly arrange the juniors
+    #     num_juniors = last_junior-last_senior
+    #     for k in xrange(num_juniors):
+    #         row = random.choice(num_juniors)
+    #         scrambled[i] = row
+
+    #     # Randomly arrange the sophomores
+    #     num_sophs = last_sophomore-last_junior
+    #     for m in xrange(num_sophs):
+    #         row = random.choice(num_sophs)
+    #         scrambled[i] = row
+
+    #     # Randomly arrange the freshmen
+    #     num_frosh = last_freshman-last_sophomore
+    #     for n in xrange(num_frosh):
+    #         row = random.choice(num_frosh)
+    #         scrambled[i] = row
+
+    #     # If anyone is "other," scramble them
+    #     if last_freshman > 0:
+    #         num_other = len(data) - last_freshman
+    #         for p in xrange(num_other):
+    #             row = random.choice(num_other)
+    #             scrambled[i] = row
+
     return scrambled
 
 def main():
