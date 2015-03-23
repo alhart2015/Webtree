@@ -9,7 +9,7 @@ def get_student_prefs(num_unique_students, possibles, student_ids, crns, trees, 
 	used_students = [None]*num_unique_students
 	student_pref_matrix = [[None]*num_unique_students] * possibles
 
-	for i ibn range(len(student_ids)):
+	for i in range(len(student_ids)):
 		student_in_question = student_ids[i]
 		class_in_question = crns[i]
 		preference = 7*(trees[i] - 1) + branches[i]
