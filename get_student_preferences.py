@@ -6,8 +6,8 @@ Authors: Rich Korzelius and Alden Hart
 """
 
 def get_student_prefs(num_unique_students, possibles, student_ids, crns, trees, branches):
-	used_students = [None]*num_unique_students
-	student_pref_matrix = [[None]*num_unique_students] * possibles
+	used_students = [None] * num_unique_students
+	student_pref_matrix = [[None]*possible] * num_unique_students
 
 	for i in range(len(student_ids)):
 		student_in_question = student_ids[i]
