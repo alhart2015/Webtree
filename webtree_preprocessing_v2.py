@@ -11,8 +11,10 @@ import csv
 import numpy as np
 import random
 
-# FILENAME = './WebTree Data/fall-2013.csv'
-FILENAME = './WebTree Data/test.csv'
+FILENAME = './WebTree Data/fall-2013.csv'
+# FILENAME = './WebTree Data/test.csv'
+OUT_FILENAME = 'processed_data.csv'
+
 FIELDS = ['ID','CLASS','CRN','TREE','BRANCH','COURSE_CEILING',
           'MAJOR','MAJOR2','SUBJ','NUMB','SEQ']
 FIELDS_WE_CARE_ABOUT = ['ID','CLASS','CRN','TREE','BRANCH','COURSE_CEILING']
@@ -22,6 +24,8 @@ CRN = 2
 TREE = 3
 BRANCH = 4
 COURSE_CEILING = 5
+
+BIG_NUMBER = 10000
 
 def read_file(filename):
     """Returns data read in from supplied WebTree data file.
@@ -95,7 +99,7 @@ def sort_by_class(ids, class_years, crns, trees, branches, ceilings):
         crns - the list of crns
         trees - the list of tree preferences
         branches - the list of branch preferences
-        ceilings - the courst ceilings
+        ceilings - the course ceilings
 
     Returns: a numpy array sorted as described above
     '''
@@ -128,6 +132,72 @@ def course_map(data):
 
     return class_map
 
+def get_unique_students(data):
+    '''Gets a list of students with no repeats
+
+    Parameter:
+        data - a numpy matrix of the data
+
+    Returns: a list with no repeats of student IDs
+    '''
+    return list(set(data[:,ID]))
+
+def get_unique_classes(data):
+    '''Gets a list of classes with no repeats
+
+    Parameter:
+        data - a numpy matrix of the data
+
+    Returns: a list with no repeats of CRNs
+    '''
+    return list(set(data[:,CRN]))
+
+def get_student_prefs(data, num_unique_students, num_unique_classes):
+    '''Make a linear ordering of each student's class preferences
+
+    Parameter:
+        data - a numpy matrix of the data
+        num_unique_students - the number of individual students
+        num_unique_classes - the number of classes offered
+
+    Returns: a numpy matrix. Each row corresponds to a student's class choices,
+        each column corresponds to a class
+    '''
+
+    used_students = {}  # Dictionary from student ID to their corresponding row
+    i = 0
+    class_map = course_map(data)
+
+    preference_matrix = np.empty([num_unique_students+2, num_unique_classes+1], dtype=np.int)
+    preference_matrix.fill(BIG_NUMBER)  # If they don't want it, put a big number
+
+    for row in data:
+        student = row[ID]
+        if student not in used_students:
+            used_students[student] = i
+            i += 1
+        course = row[CRN]
+        preference = 7*(row[TREE] - 1) + row[BRANCH]
+        cap = class_map[course][1]
+        # print student, course, class_map[course], preference, cap
+        
+        r = used_students[student] + 2
+        c = class_map[course][0] + 1    # The index in the list of that course
+        
+        if preference_matrix[r][c] > preference:
+            preference_matrix[r][c] = preference
+        preference_matrix[r][0] = student
+        preference_matrix[0][c] = course
+        preference_matrix[1][c] = cap
+
+    return preference_matrix
+
+def write_file(data, filename):
+    '''Writes the data to a CSV file'''
+    with open(filename, 'wt') as f:
+        writer = csv.writer(f)
+        for row in data:
+            writer.writerow(row)
 
 def main():
     all_data = read_file(FILENAME)
@@ -140,10 +210,18 @@ def main():
     ceilings = all_data[COURSE_CEILING]
 
     sorted_data = sort_by_class(ids, class_years, crns, trees, branches, ceilings)
-    print sorted_data
-    class_map = course_map(sorted_data)
-    for k in class_map:
-        print k, class_map[k]
+    # print sorted_data
+
+    unique_students = get_unique_students(sorted_data)
+    num_unique_students = len(unique_students)
+    unique_classes = get_unique_classes(sorted_data)
+    num_unique_classes = len(unique_classes)
+
+    preference_matrix = get_student_prefs(sorted_data, num_unique_students, num_unique_classes)
+    # print preference_matrix
+
+    write_file(preference_matrix, OUT_FILENAME)
+
 
 if __name__ == '__main__':
     main()
