@@ -4,8 +4,9 @@ integer programming problem in MATLAB. Reads in the file, sorts it accordingly,
 and outputs a text file in an easy-to-parse format.
 
 Author: Alden Hart
-3/18/2015
+3/23/2015
 '''
+
 import csv
 import numpy as np
 import random
@@ -105,78 +106,28 @@ def sort_by_class(ids, class_years, crns, trees, branches, ceilings):
     
     return desc_sorted_data
 
-def random_ordering(data):
-    '''Takes sorted data and puts it in a random ordering by class. Seniors
-        all come before juniors, juniors before sophomores, etc.
+def course_map(data):
+    '''Returns a map from CRNs to their index in the list and the course cap.
 
-    Parameters:
-        data - a 2-D numpy array sorted in descending order by class
-
-    Returns: a numpy array scrambled as described above
+    Parameter:
+        data - a two-dimensional numpy matrix of the data
+    
+    Returns: a dict with keys of CRNs and values of (index, cap) tuples
     '''
-    # Find where each class ends
-    senior_found, junior_found, soph_found, frsh_found = False, False, False, False
-    for i in xrange(len(data)):
-        if not senior_found and data[i][CLASS] == 3:
-            senior_found = True
-            last_senior = i
-        elif not junior_found and data[i][CLASS] == 2:
-            junior_found = True
-            last_junior = i
-        elif not soph_found and data[i][CLASS] == 1:
-            soph_found = True
-            last_sophomore = i
-        elif not frsh_found:
-            if data[i][CLASS] == 0:
-                frsh_found = True
-                last_freshman = i
-            else:
-                last_freshman = 0
+    found_classes = set()
+    class_map = {}
+    i = 0
 
-    print last_senior, last_junior, last_sophomore, last_freshman
+    for row in data:
+        crn = row[CRN]
+        if crn not in found_classes:
+            cap = row[COURSE_CEILING]
+            class_map[crn] = (i, cap)
+            i += 1
+            found_classes.add(crn)
 
-    # Preallocate for speed
-    scrambled = np.zeros([len(data), len(data[0])])
+    return class_map
 
-    # Randomly arrange the seniors
-    senior_order = random.sample(range(last_senior), last_senior)
-    print senior_order
-    for i in range(last_senior):
-        scrambled[senior_order[i]] = data[i]
-
-    # Randomly arrange the juniors
-    num_juniors = last_junior - last_senior
-    junior_order = random.sample(range(last_senior, last_junior), num_juniors)
-    print junior_order
-    for i in range(last_senior, last_junior):
-        scrambled[junior_order[i]] = data[i]        
-
-    # Randomly arrange the sophomores
-    num_sophs = last_sophomore - last_junior
-    soph_order = random.sample(range(last_junior, last_sophomore), num_sophs)
-    print soph_order
-    for i in range(last_junior, last_sophomore):
-        scrambled[soph_order[i]] = data[i]
-
-    # Randomly arrange the freshmen
-    if last_freshman > 0:
-        num_frosh = last_freshman - last_sophomore
-    else:
-        num_frosh = len(data) - last_sophomore
-    freshman_order = random.sample(range(last_sophomore, len(data)), num_frosh)
-    print freshman_order
-    for i in range(last_sophomore, len(data)):
-        scrambled[freshman_order[i]] = data[i]
-
-    # Randomly arrange the "others"
-    others_exist = False
-    if last_freshman > 0:
-        num_other = len(data) - last_freshman
-        other_order = random.sample(range(last_freshman, len(data)), num_other)
-        others_exist = True
-    print len(data)
-
-    return scrambled
 
 def main():
     all_data = read_file(FILENAME)
@@ -190,15 +141,9 @@ def main():
 
     sorted_data = sort_by_class(ids, class_years, crns, trees, branches, ceilings)
     print sorted_data
-    scrambled_data = random_ordering(sorted_data)
-    print scrambled_data
-
-    # print ids[5]
-    # print class_years[5]
-    # print crns[5]
-    # print trees[5]
-    # print branches[5]
-    # print ceilings[5]
+    class_map = course_map(sorted_data)
+    for k in class_map:
+        print k, class_map[k]
 
 if __name__ == '__main__':
     main()
