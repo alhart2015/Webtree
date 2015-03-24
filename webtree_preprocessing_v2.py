@@ -216,6 +216,7 @@ def main():
     num_unique_students = len(unique_students)
     unique_classes = get_unique_classes(sorted_data)
     num_unique_classes = len(unique_classes)
+    print num_unique_students, num_unique_classes
 
     preference_matrix = get_student_prefs(sorted_data, num_unique_students, num_unique_classes)
     # print preference_matrix
