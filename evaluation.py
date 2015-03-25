@@ -116,9 +116,60 @@ def remove_uniques(ranks):
     '''
     unique_ranks = {}
     for student, lst in ranks.iteritems():
-        pass
+        unique_ranks[student] = unique_classes(lst)
 
     return unique_ranks
+
+def unique_classes(lst):
+    '''Helper function to take a list of (class, tree, branch) tuples and 
+        return a list of tuples with no repeats of classes and only the 
+        lowest tree, branch choices for each class.
+
+    Parameter:
+        lst - a list of tuples
+
+    Returns: a list with the most preferred classes chosen
+    '''
+    classes = {}
+    for tple in lst:
+        crn = tple[0]
+        if crn in classes:
+            class_in_dict = classes[crn]
+            new_class = (tple[1], tple[2])
+            if higher_preference(new_class, class_in_dict):
+                classes[crn] = new_class
+        else:
+            classes[crn] = (tple[1], tple[2])
+
+    uniques = []
+    for k, v in classes.iteritems():
+        uniques.append( (k, v[0], v[1]) )
+
+    return uniques
+
+def higher_preference(class_a, class_b):
+    '''Determines which of class_a and class_b the user wanted more.
+
+    Parameter:
+        class_a - a 3-tuple of (crn, tree, branch)
+        class_b - a 3-tuple of (crn, tree, branch)
+
+    Returns: true if the user preferred class_a, false otherwise
+    '''
+    tree_a = class_a[0]
+    branch_a = class_a[1]
+    tree_b = class_b[0]
+    branch_b = class_b[1]
+
+    if tree_a <= tree_b:
+        if tree_a < tree_b:
+            return True
+        elif branch_a < branch_b:
+            return True
+
+    return False
+
+
 
 def main():
     assignments = read_in_assignments(ASSIGNMENT_FILENAME)
@@ -127,7 +178,7 @@ def main():
     unique_ranks = remove_uniques(ranks)
     for i in range(10):
         print requests[i]
-        
+
     j = 0
     for k, v in assignments.iteritems():
         if j < 10:
