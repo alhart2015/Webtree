@@ -11,9 +11,9 @@ import csv
 import numpy as np
 import random
 
-FILENAME = './WebTree Data/fall-2013.csv'
+FILENAME = './WebTree Data/spring-2015.csv'
 # FILENAME = './WebTree Data/test.csv'
-OUT_FILENAME = 'processed_data.csv'
+OUT_FILENAME = 'processed_data_spring-2015.csv'
 
 FIELDS = ['ID','CLASS','CRN','TREE','BRANCH','COURSE_CEILING',
           'MAJOR','MAJOR2','SUBJ','NUMB','SEQ']

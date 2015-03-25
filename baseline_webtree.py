@@ -8,6 +8,8 @@ from happiness_function import evaluate_happiness
 FIELDS = ['ID','CLASS','CRN','TREE','BRANCH','COURSE_CEILING',
           'MAJOR','MAJOR2','SUBJ','NUMB','SEQ']
 
+OUTFILE = 'baseline_matches_spring-2015.txt'
+
 def read_file(filename):
     """Returns data read in from supplied WebTree data file.
 
@@ -149,6 +151,15 @@ def run_webtree(student_requests, students_by_class, courses, random_ordering):
                                         
     return assignments
 
+def write_out(assignments, filename):
+    '''Writes the final assignments to a txt file.'''
+    with open(filename, 'w') as f:
+        for a in sorted(assignments):
+            f.write(str(a) + ' ')
+            for c in assignments[a]:
+                f.write(str(c) + ' ')
+            f.write('\n')
+
 
 def main():
     if (len(sys.argv) != 2):
@@ -174,37 +185,39 @@ def main():
                               courses, random_ordering)
 
 
-    # Print results to stdout
-    for id in assignments:
-        print id,
-        for course in assignments[id]:
-            print course,
-        print
+    # # Print results to stdout
+    # for id in assignments:
+    #     print id,
+    #     for course in assignments[id]:
+    #         print course,
+    #     print
 
-    test_prefs = [[None]*25]*9
-    test_prefs[0][1] = 10016
-    test_prefs[0][8] = 10016
-    test_prefs[1][2] = 10016
-    test_prefs[1][5] = 10016
-    test_prefs[3][7] = 10686
-    test_prefs[2][3] = 10686
-    test_prefs[2][6] = 10686
-    test_prefs[2][8] = 10686
-    test_prefs[4][2] = 10686
-    test_prefs[4][5] = 10686
-    test_prefs[4][9] = 10686
-    test_prefs[4][11] = 10686
-    test_prefs[4][15] = 10686
-    test_prefs[5][0] = 10686
-    test_prefs[6][23] = 10686
-    test_prefs[7][7] = 15148
-    test_prefs[7][16] = 15148
-    test_prefs[7][19] = 15148
-    test_prefs[8][2] = 15148
-    test_prefs[8][9] = 15148
-    test_prefs[8][16] = 15148
+    write_out(assignments, OUTFILE)
 
-    print "Happines value: " + str(evaluate_happiness(assignments, test_prefs))
+    # test_prefs = [[None]*25]*9
+    # test_prefs[0][1] = 10016
+    # test_prefs[0][8] = 10016
+    # test_prefs[1][2] = 10016
+    # test_prefs[1][5] = 10016
+    # test_prefs[3][7] = 10686
+    # test_prefs[2][3] = 10686
+    # test_prefs[2][6] = 10686
+    # test_prefs[2][8] = 10686
+    # test_prefs[4][2] = 10686
+    # test_prefs[4][5] = 10686
+    # test_prefs[4][9] = 10686
+    # test_prefs[4][11] = 10686
+    # test_prefs[4][15] = 10686
+    # test_prefs[5][0] = 10686
+    # test_prefs[6][23] = 10686
+    # test_prefs[7][7] = 15148
+    # test_prefs[7][16] = 15148
+    # test_prefs[7][19] = 15148
+    # test_prefs[8][2] = 15148
+    # test_prefs[8][9] = 15148
+    # test_prefs[8][16] = 15148
+
+    # print "Happines value: " + str(evaluate_happiness(assignments, test_prefs))
 
         
 if __name__ == "__main__":
