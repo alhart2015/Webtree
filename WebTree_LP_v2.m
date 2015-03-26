@@ -4,8 +4,8 @@
 % Author: Alden Hart and Rich Korzelius
 % 3/22/2015
 
-FILENAME = 'processed_data_spring-2015.csv'
-OUTFILE = 'MATLAB_result_spring-2015.txt'
+FILENAME = 'processed_data_spring-2014.csv'
+OUTFILE = 'MATLAB_result_spring-2014.txt'
 
 all_data = csvread(FILENAME);
 student_ids = all_data(3:end,1);

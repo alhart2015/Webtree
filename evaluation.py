@@ -9,8 +9,21 @@ Author: Alden Hart
 import csv
 import numpy as np
 
-ASSIGNMENT_FILENAME = 'class_matching_fall-2013.txt'
-ORIGINAL_FILENAME = './WebTree Data/fall-2013.csv'
+FA_2013_ASSIGNMENT_FILENAME = 'class_matching_fall-2013.txt'
+FA_2013_BASELINE_MATCHING = 'baseline_matches_fall-2013.txt'
+FA_2013_ORIGINAL_FILENAME = './WebTree Data/fall-2013.csv'
+
+FA_2014_ASSIGNMENT_FILENAME = 'class_matching_fall-2014.txt'
+FA_2014_BASELINE_MATCHING = 'baseline_matches_fall-2014.txt'
+FA_2014_ORIGINAL_FILENAME = './WebTree Data/fall-2014.csv'
+
+SP_2014_ASSIGNMENT_FILENAME = 'class_matching_spring-2014.txt'
+SP_2014_BASELINE_MATCHING = 'baseline_matches_spring-2014.txt'
+SP_2014_ORIGINAL_FILENAME = './WebTree Data/spring-2014.csv'
+
+SP_2015_ASSIGNMENT_FILENAME = 'class_matching_spring-2015.txt'
+SP_2015_BASELINE_MATCHING = 'baseline_matches_spring-2015.txt'
+SP_2015_ORIGINAL_FILENAME = './WebTree Data/spring-2015.csv'
 
 FIELDS = ['ID','CLASS','CRN','TREE','BRANCH','COURSE_CEILING',
           'MAJOR','MAJOR2','SUBJ','NUMB','SEQ']
@@ -169,38 +182,192 @@ def higher_preference(class_a, class_b):
 
     return False
 
+def duplicate_counts(ranks):
+    '''Returns an estimation for the success of the ranking. If a user put
+        a class multiple times, it is likely that the user really wanted to
+        get that class. This counts the number of duplicates in a user's 
+        assigned courses and sets that to be their "score" (higher scores
+        are better)
+
+    Parameter:
+        ranks - a dictionary as assigned by assigned_ranks()
+
+    Returns: a dictionary with student IDs as keys and scores as values.
+    '''
+    scores = {}
+    for student, lst in ranks.iteritems():
+        scores[student] = count_classes(lst)
+
+    return scores
+
+def count_classes(lst):
+    '''Counts the number of duplicate classes in the given list.
+
+    Parameter:
+        lst - a list of 3-tuples (crn, tree, branch)
+
+    Returns: the number of duplicates in the list
+    '''
+    count = 0
+    found_classes = set()
+    for tple in lst:
+        current_class = tple[0]
+        if current_class in found_classes:
+            count += 1
+        else:
+            found_classes.add(current_class)
+
+    return count
+
+def average_count_score(duplicate_counts):
+    '''Returns the average duplicate count of the set of assignments, as a 
+        metric for how good the matching was.
+    '''
+    total_score = 0
+    total_counts = 0.0
+    for person, score in duplicate_counts.iteritems():
+        total_counts += 1
+        total_score += score
+
+    return total_score / total_counts
+
+def d_score(assignment_file, request_file):
+    '''Returns the average number of times a person put a courses they got in 
+        WebTree, as a measure of how good the matching was.
+    '''
+    assignments = read_in_assignments(assignment_file)
+    requests = read_file(request_file)
+    ranks = assigned_ranks(assignments, requests)
+    duplicate_scores = duplicate_counts(ranks)
+
+    return average_count_score(duplicate_scores)
+
+def tree_score(unique_ranks):
+    '''Returns the average (tree, branch) position of the four assigned classes.
+    '''
+    tot_tree = 0
+    tot_branch = 0
+    num_students = 0.0
+    for student, classes in unique_ranks.iteritems():
+        # tot_tree += classes[1]
+        # tot_branch += classes[2]
+        student_scores = individual_score(classes)
+        tot_tree += student_scores[0]
+        tot_branch += student_scores[1]
+        num_students += 1
+
+    return (tot_tree/num_students, tot_branch/num_students)
+
+def individual_score(classes):
+    '''Calculates the average tree and branch position of the four classes
+        assigned to the student.
+
+    Parameter:
+        classes - a list of (crn, tree, branch) tuples of the classes assigned
+
+    Returns: a tuple of (average tree, average branch)
+    '''
+    tot_tree = 0.0
+    tot_branch = 0.0
+    for c in classes:
+        tot_tree += float(c[1])
+        tot_branch += float(c[2])
+
+    return (tot_tree/len(classes), tot_branch/len(classes))
+
+def all_scores(assignment_file, request_file):
+    '''Computes both the duplicate score and tree score for the given assignment.
+
+    Parameter:
+        assignment_file - the file with the class assignments
+        request_file - the WebTree data file
+
+    Returns: a 3-tuple (duplicate score, tree score, branch score)
+    '''
+    assignments = read_in_assignments(assignment_file)
+    requests = read_file(request_file)
+    ranks = assigned_ranks(assignments, requests)
+    unique_ranks = remove_uniques(ranks)
+    duplicate_scores = duplicate_counts(ranks)
+    avg_d_score = average_count_score(duplicate_scores)
+    avg_tree_score = tree_score(unique_ranks)
+
+    return (avg_d_score, avg_tree_score[0], avg_tree_score[1])
 
 
 def main():
-    assignments = read_in_assignments(ASSIGNMENT_FILENAME)
-    requests = read_file(ORIGINAL_FILENAME)
-    ranks = assigned_ranks(assignments, requests)
-    unique_ranks = remove_uniques(ranks)
-    for i in range(10):
-        print requests[i]
+    # assignments = read_in_assignments(ASSIGNMENT_FILENAME)
+    # requests = read_file(ORIGINAL_FILENAME)
+    # ranks = assigned_ranks(assignments, requests)
+    # unique_ranks = remove_uniques(ranks)
+    # duplicate_scores = duplicate_counts(ranks)
 
-    j = 0
-    for k, v in assignments.iteritems():
-        if j < 10:
-            print k, v
-        j += 1
+    # our_score = d_score(ASSIGNMENT_FILENAME, ORIGINAL_FILENAME)
+    # baseline_score = d_score(BASELINE_MATCHING, ORIGINAL_FILENAME)
+    # our_tree_score = t_score(ASSIGNMENT_FILENAME, ORIGINAL_FILENAME)
 
-    j = 0
-    for k, v in ranks.iteritems():
-        if j < 10:
-            print k, v
-        j += 1
+    fa_2013_our_score = all_scores(FA_2013_ASSIGNMENT_FILENAME, FA_2013_ORIGINAL_FILENAME)
+    fa_2013_baseline_score = all_scores(FA_2013_BASELINE_MATCHING, FA_2013_ORIGINAL_FILENAME)
+    print 'fall-2013'
+    print 'ours', fa_2013_our_score
+    print 'baseline', fa_2013_baseline_score
 
-    j = 0
-    for k, v in unique_ranks.iteritems():
-        if j < 10:
-            print k, v
-        j += 1
+    fa_2014_our_score = all_scores(FA_2014_ASSIGNMENT_FILENAME, FA_2014_ORIGINAL_FILENAME)
+    fa_2014_baseline_score = all_scores(FA_2014_BASELINE_MATCHING, FA_2014_ORIGINAL_FILENAME)
+    print 'fall-2014'
+    print 'ours', fa_2014_our_score
+    print 'baseline', fa_2014_baseline_score
 
-    print '344' in assignments
-    print '15262' in assignments['344']
-    print assignments['344']
-    print 15262 in assignments['344']
+    sp_2014_our_score = all_scores(SP_2014_ASSIGNMENT_FILENAME, SP_2014_ORIGINAL_FILENAME)
+    sp_2014_baseline_score = all_scores(SP_2014_BASELINE_MATCHING, SP_2014_ORIGINAL_FILENAME)
+    print 'spring-2014'
+    print 'ours', sp_2014_our_score
+    print 'baseline', sp_2014_baseline_score
+
+    sp_2015_our_score = all_scores(SP_2015_ASSIGNMENT_FILENAME, SP_2015_ORIGINAL_FILENAME)
+    sp_2015_baseline_score = all_scores(SP_2015_BASELINE_MATCHING, SP_2015_ORIGINAL_FILENAME)
+    print 'spring-2015'
+    print 'ours', sp_2015_our_score
+    print 'baseline', sp_2015_baseline_score
+
+    # # The raw data
+    # for i in range(10):
+    #     print requests[i]
+
+    # # Each person's class assignment
+    # j = 0
+    # for k, v in assignments.iteritems():
+    #     if j < 10:
+    #         print k, v
+    #     j += 1
+
+    # # The ranks people gave the classes they got
+    # j = 0
+    # for k, v in ranks.iteritems():
+    #     if j < 10:
+    #         print k, v
+    #     j += 1
+
+    # The highest rank of each class given to a person
+    # j = 0
+    # for k, v in unique_ranks.iteritems():
+    #     if j < 10:
+    #         print k, v
+    #     j += 1
+
+    # The "duplicate score" of each person
+    # j = 0
+    # for k, v in duplicate_scores.iteritems():
+    #     if j < 10:
+    #         print k, v
+    #     j += 1
+
+    # print average_count_score(duplicate_scores)
+
+    # print '344' in assignments
+    # print '15262' in assignments['344']
+    # print assignments['344']
+    # print 15262 in assignments['344']
 
 if __name__ == '__main__':
     main()
