@@ -322,29 +322,75 @@ def main():
     # baseline_score = d_score(BASELINE_MATCHING, ORIGINAL_FILENAME)
     # our_tree_score = t_score(ASSIGNMENT_FILENAME, ORIGINAL_FILENAME)
 
+    our_avg_dup_score = 0
+    our_avg_tree_score = 0
+    our_avg_branch_score = 0
+
+    baseline_avg_dup_score = 0
+    baseline_avg_tree_score = 0
+    baseline_avg_branch_score = 0
+    baseline_avg_classes = 0
+
     fa_2013_our_score = all_scores(FA_2013_ASSIGNMENT_FILENAME, FA_2013_ORIGINAL_FILENAME)
     fa_2013_baseline_score = all_scores(FA_2013_BASELINE_MATCHING, FA_2013_ORIGINAL_FILENAME)
     print 'fall-2013'
     print 'ours', fa_2013_our_score
     print 'baseline', fa_2013_baseline_score
+    our_avg_dup_score += fa_2013_our_score[0]
+    our_avg_tree_score += fa_2013_our_score[1]
+    our_avg_branch_score += fa_2013_our_score[2]
+    baseline_avg_dup_score += fa_2013_baseline_score[0]
+    baseline_avg_tree_score += fa_2013_baseline_score[1]
+    baseline_avg_branch_score += fa_2013_baseline_score[2]
+    baseline_avg_classes += fa_2013_baseline_score[3]
 
     fa_2014_our_score = all_scores(FA_2014_ASSIGNMENT_FILENAME, FA_2014_ORIGINAL_FILENAME)
     fa_2014_baseline_score = all_scores(FA_2014_BASELINE_MATCHING, FA_2014_ORIGINAL_FILENAME)
     print 'fall-2014'
     print 'ours', fa_2014_our_score
     print 'baseline', fa_2014_baseline_score
+    our_avg_dup_score += fa_2014_our_score[0]
+    our_avg_tree_score += fa_2014_our_score[1]
+    our_avg_branch_score += fa_2014_our_score[2]
+    baseline_avg_dup_score += fa_2014_baseline_score[0]
+    baseline_avg_tree_score += fa_2014_baseline_score[1]
+    baseline_avg_branch_score += fa_2014_baseline_score[2]
+    baseline_avg_classes += fa_2014_baseline_score[3]
 
     sp_2014_our_score = all_scores(SP_2014_ASSIGNMENT_FILENAME, SP_2014_ORIGINAL_FILENAME)
     sp_2014_baseline_score = all_scores(SP_2014_BASELINE_MATCHING, SP_2014_ORIGINAL_FILENAME)
     print 'spring-2014'
     print 'ours', sp_2014_our_score
     print 'baseline', sp_2014_baseline_score
+    our_avg_dup_score += sp_2014_our_score[0]
+    our_avg_tree_score += sp_2014_our_score[1]
+    our_avg_branch_score += sp_2014_our_score[2]
+    baseline_avg_dup_score += sp_2014_baseline_score[0]
+    baseline_avg_tree_score += sp_2014_baseline_score[1]
+    baseline_avg_branch_score += sp_2014_baseline_score[2]
+    baseline_avg_classes += sp_2014_baseline_score[3]
 
     sp_2015_our_score = all_scores(SP_2015_ASSIGNMENT_FILENAME, SP_2015_ORIGINAL_FILENAME)
     sp_2015_baseline_score = all_scores(SP_2015_BASELINE_MATCHING, SP_2015_ORIGINAL_FILENAME)
     print 'spring-2015'
     print 'ours', sp_2015_our_score
     print 'baseline', sp_2015_baseline_score
+    our_avg_dup_score += sp_2015_our_score[0]
+    our_avg_tree_score += sp_2015_our_score[1]
+    our_avg_branch_score += sp_2015_our_score[2]
+    baseline_avg_dup_score += sp_2015_baseline_score[0]
+    baseline_avg_tree_score += sp_2015_baseline_score[1]
+    baseline_avg_branch_score += sp_2015_baseline_score[2]
+    baseline_avg_classes += sp_2015_baseline_score[3]
+
+    print 'our duplicate:', our_avg_dup_score/4.0
+    print 'our tree:', our_avg_tree_score/4.0
+    print 'our branch:', our_avg_branch_score/4.0
+    print
+    print 'baseline dup:', baseline_avg_dup_score/4.0
+    print 'baseline tree:', baseline_avg_tree_score/4.0
+    print 'baseline branch:', baseline_avg_branch_score/4.0
+    print 'baseline classes:', baseline_avg_classes/4.0
 
     # # The raw data
     # for i in range(10):
@@ -384,6 +430,26 @@ def main():
     # print '15262' in assignments['344']
     # print assignments['344']
     # print 15262 in assignments['344']
+
+    f2013 = read_in_assignments(FA_2013_BASELINE_MATCHING)
+    f2014 = read_in_assignments(FA_2014_BASELINE_MATCHING)
+    s2014 = read_in_assignments(SP_2014_BASELINE_MATCHING)
+    s2015 = read_in_assignments(SP_2015_BASELINE_MATCHING)
+    total = 0
+    for person, classes in f2013.iteritems():
+        if len(classes) < 4:
+            total += 1
+    for person, classes in f2014.iteritems():
+        if len(classes) < 4:
+            total += 1
+    for person, classes in s2014.iteritems():
+        if len(classes) < 4:
+            total += 1
+    for person, classes in s2015.iteritems():
+        if len(classes) < 4:
+            total += 1
+
+    print 'Students without four classes:', total / 4.0
 
 if __name__ == '__main__':
     main()
