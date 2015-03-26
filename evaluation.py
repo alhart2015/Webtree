@@ -291,8 +291,24 @@ def all_scores(assignment_file, request_file):
     duplicate_scores = duplicate_counts(ranks)
     avg_d_score = average_count_score(duplicate_scores)
     avg_tree_score = tree_score(unique_ranks)
+    avg_num_classes = avg_classes_assigned(assignments)
 
-    return (avg_d_score, avg_tree_score[0], avg_tree_score[1])
+    return (avg_d_score, avg_tree_score[0], avg_tree_score[1], avg_num_classes)
+
+def avg_classes_assigned(assignments):
+    '''Maybe the most important metric is how many classes get assigned per 
+        person. This returns the average number of classes per person.
+
+    Parameter:
+        assignments - the class assignments
+
+    Returns: the average number of classes assigned to each person
+    '''
+    total_classes = 0.0
+    for person, classes in assignments.iteritems():
+        total_classes += len(classes)
+
+    return total_classes/len(assignments)
 
 
 def main():
